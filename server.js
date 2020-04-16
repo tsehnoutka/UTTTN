@@ -63,7 +63,9 @@ for (i = 0; i < 2; i++) {
       tmpColor = "green";
   }
 }
-console.log("Function: " + foo + ", From: " + tmpColor + ", Room: " + room);
+let dt = new Date(new Date().getTime());
+dtFormatted = (dt.getHours() < 10 ? '0' + dt.getHours() : dt.getHours()) + ':' + (dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes());
+console.log(dtFormatted + " - Function: " + foo + ", From: " + tmpColor + ", Room: " + room);
 }
 
 //  ***********************************************************************
