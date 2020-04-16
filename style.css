@@ -1,0 +1,105 @@
+@font-face {
+   font-family: comicNeue;
+   src: url(./fonts/comic_neue/ComicNeue-Light.ttf);
+}
+
+@font-face {
+   font-family: comicNeue;
+   src: url(./fonts/comic_neue/ComicNeue-Bold.ttf);
+   font-weight: bold;
+}
+
+* {
+   font-family: comicNeue;
+  font-weight: bold;
+}
+
+/*
+.* {
+  font-family: tahoma;
+  font-size: 12px;
+  padding: 0px;
+  margin: 0px;
+}
+*/
+.body {
+  background: url(./img/bush.png) repeat 0 0;
+}
+
+.p {
+  line-height: 18px;
+}
+
+.div {
+  width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.auto-style1 {
+  font-size: x-large;
+}
+
+.auto-style2 {
+  font-size: xx-small;
+}
+
+.content {
+  padding: 5px;
+  background: #ddd;
+  border-radius: 5px;
+  overflow-y: scroll;
+  border: 1px solid #CCC;
+  margin-top: 10px;
+  height: 160px;
+}
+
+.input {
+  border-radius: 2px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  padding: 5px;
+  width: 600px;
+}
+
+.status {
+  width: 88px;
+  display: block;
+  float: left;
+  margin-top: 15px;
+}
+
+.grid {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+
+.vert {
+  border-left: 3px solid black;
+  border-right: 3px solid black;
+}
+
+.hori {
+  border-top: 3px solid black;
+  border-bottom: 3px solid black;
+}
+
+.rightVert {
+  border-left: 5px solid blue;
+}
+
+.topHori {
+  border-top: 5px solid blue;
+}
+
+.cube {
+  float: left;
+  width: 15px;
+  height: 15px;
+  background-color: red;
+  padding: 10px;
+  border: 1px solid black;
+}

@@ -1,0 +1,223 @@
+<!--
+Ideas taken from:
+  https://medium.com/@martin.sikora/node-js-websocket-simple-chat-tutorial-2def3a841b61
+  https://embed.plnkr.co/plunk/NAOYuT
+  https://codereview.stackexchange.com/questions/155011/real-time-tic-tac-toe-game-in-javascript-using-socket-io
+  https://medium.com/@shashankvivek.7/understanding-xss-and-preventing-it-using-pure-javascript-ef0668b37687
+  https://node-postgres.com/features/queries
+  https://24ways.org/2012/how-to-make-your-site-look-half-decent/
+
+TODO:
+ - TEST !!
+   - what if I load and save it before my opponent joins?
+ - Enhancements
+   - ping - to remove connections that died Do I need this ?
+   - remove global scope variables ???
+   - server needs to remove dead conections ( there may be a memory leak) ( i think i did this)
+   - Let user select thier color ???  ( not sure I can do this with save and load -  no way to say " I am red")
+   - gracefull cleanup server on shutdown?  ( when it receives CTRL-C or when pm2 shuts it down)
+   - remove games from database that have "aged" out
+   - save after every turn ( auto save)  then delete when an outcome has been reached
+   - make more robust - play it and see where it breaks
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Tic Tac Toe</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon"  type="image/png" href="img/favicon.ico">
+  <style>
+    body {
+      background-image: url(./img/bush.png);
+    }
+  .auto-style3 {
+	text-align: left;
+}
+  </style>
+</head>
+
+<body>
+  <table>
+    <tr>
+      <td style="width: 599px">
+        <!-- chat stuff -->
+        <p class="auto-style1">
+          <strong>
+            <a href="https://en.wikipedia.org/wiki/Ultimate_tic-tac-toe" target="_blank" title="click for description and rules">
+              Ultimate Tic Tac Toe
+            </a>
+            <a size="8px"> <span class="auto-style2">
+                <-- click for info and rules</span></a>
+          </strong>
+        </p>
+        <div id="content" class="content"></div>
+        <div class="auto-style3">
+          <span id="status">Message: </span>
+          <input type="text" id="input" class="input" disabled />
+          <input type="checkbox" id="playSound" checked>play sound</input>
+          <br>
+        </div>
+        <br><br>
+        <div>
+          Name: <input type="text" name="name" id="nameNew" placeholder="Enter your name" required>
+          <button id="new">New Game</button>
+        </div>
+        <br>
+        <div>
+          Name: <input type="text" name="jname" id="nameJoin" placeholder="Enter your name" required>
+          Code: <input type="text" name="room" id="room" placeholder="Enter code" required>
+          <button id="join">Join</button>
+        </div>
+      </td>
+      <td>
+        <!--  grid -->
+        <table>
+          <tr>
+            <td><button id="111" class="grid"></button></td>
+            <td><button id="112" class="grid vert"></button></td>
+            <td><button id="113" class="grid"></button></td>
+            <td><button id="211" class="grid rightVert"></button></td>
+            <td><button id="212" class="grid vert"></button></td>
+            <td><button id="213" class="grid"></button></td>
+            <td><button id="311" class="grid  rightVert"></button></td>
+            <td><button id="312" class="grid vert"></button></td>
+            <td><button id="313" class="grid"></button></td>
+          </tr>
+          <tr>
+            <td><button id="121" class="grid hori"></button></td>
+            <td><button id="122" class="grid vert hori"></button></td>
+            <td><button id="123" class="grid hori"></button></td>
+            <td><button id="221" class="grid hori rightVert"></button></td>
+            <td><button id="222" class="grid vert hori"></button></td>
+            <td><button id="223" class="grid hori"></button></td>
+            <td><button id="321" class="grid hori rightVert"></button></td>
+            <td><button id="322" class="grid vert hori"></button></td>
+            <td><button id="323" class="grid hori"></button></td>
+          </tr>
+          <tr>
+            <td><button id="131" class="grid"></button></td>
+            <td><button id="132" class="grid vert"></button></td>
+            <td><button id="133" class="grid"></button></td>
+            <td><button id="231" class="grid rightVert"></button></td>
+            <td><button id="232" class="grid vert "></button></td>
+            <td><button id="233" class="grid"></button></td>
+            <td><button id="331" class="grid rightVert"></button></td>
+            <td><button id="332" class="grid vert"></button></td>
+            <td><button id="333" class="grid"></button></td>
+          </tr>
+
+          <!--  middle set -->
+          <tr>
+            <td><button id="411" class="grid topHori"></button></td>
+            <td><button id="412" class="grid vert topHori"></button></td>
+            <td><button id="413" class="grid topHori"></button></td>
+            <td><button id="511" class="grid topHori rightVert"></button></td>
+            <td><button id="512" class="grid vert topHori"></button></td>
+            <td><button id="513" class="grid topHori"></button></td>
+            <td><button id="611" class="grid topHori rightVert"></button></td>
+            <td><button id="612" class="grid vert topHori"></button></td>
+            <td><button id="613" class="grid topHori"></button></td>
+          </tr>
+          <tr>
+            <td><button id="421" class="grid hori"></button></td>
+            <td><button id="422" class="grid vert hori"></button></td>
+            <td><button id="423" class="grid hori"></button></td>
+            <td><button id="521" class="grid hori rightVert"></button></td>
+            <td><button id="522" class="grid vert hori"></button></td>
+            <td><button id="523" class="grid hori"></button></td>
+            <td><button id="621" class="grid hori rightVert"></button></td>
+            <td><button id="622" class="grid vert hori"></button></td>
+            <td><button id="623" class="grid hori"></button></td>
+          </tr>
+          <tr>
+            <td><button id="431" class="grid"></button></td>
+            <td><button id="432" class="grid vert"></button></td>
+            <td><button id="433" class="grid"></button></td>
+            <td><button id="531" class="grid  rightVert"></button></td>
+            <td><button id="532" class="grid vert"></button></td>
+            <td><button id="533" class="grid"></button></td>
+            <td><button id="631" class="grid rightVert"></button></td>
+            <td><button id="632" class="grid  vert "></button></td>
+            <td><button id="633" class="grid"></button></td>
+          </tr>
+
+          <!--  Bottem set -->
+          <tr>
+            <td><button id="711" class="grid topHori"></button></td>
+            <td><button id="712" class="grid vert topHori"></button></td>
+            <td><button id="713" class="grid topHori"></button></td>
+            <td><button id="811" class="grid topHori rightVert"></button></td>
+            <td><button id="812" class="grid vert topHori"></button></td>
+            <td><button id="813" class="grid topHori"></button></td>
+            <td><button id="911" class="grid topHori rightVert"></button></td>
+            <td><button id="912" class="grid vert topHori"></button></td>
+            <td><button id="913" class="grid topHori"></button></td>
+          </tr>
+          <tr>
+            <td><button id="721" class="grid hori"></button></td>
+            <td><button id="722" class="grid vert hori"></button></td>
+            <td><button id="723" class="grid hori"></button></td>
+            <td><button id="821" class="grid hori rightVert"></button></td>
+            <td><button id="822" class="grid vert hori"></button></td>
+            <td><button id="823" class="grid hori"></button></td>
+            <td><button id="921" class="grid hori rightVert"></button></td>
+            <td><button id="922" class="grid vert hori"></button></td>
+            <td><button id="923" class="grid hori"></button></td>
+          </tr>
+          <tr>
+            <td><button id="731" class="grid"></button></td>
+            <td><button id="732" class="grid vert"></button></td>
+            <td><button id="733" class="grid"></button></td>
+            <td><button id="831" class="grid rightVert"></button></td>
+            <td><button id="832" class="grid vert"></button></td>
+            <td><button id="833" class="grid"></button></td>
+            <td><button id="931" class="grid rightVert"></button></td>
+            <td><button id="932" class="grid vert"></button></td>
+            <td><button id="933" class="grid"></button></td>
+          </tr>
+          <tr>
+            <table>
+              <tr>
+                <td><button id="playagain" value="Play Again">Restart</button></td>
+                <td>Turn:</td>
+                <td>
+                  <div align="left" id="turnbox" class=cube></div>
+                </td>
+              </tr>
+              <td><button id="save" value="Save">Save</button></td>
+              <td><button id="load" value="load">Load</button></td>
+              <td>Game ID:
+			  <input type="text" name="LoadID" id="loadID" placeholder="Enter game ID" required style="width: 91px"></td>
+              <td>
+                <input type="checkbox" id="redCB" value="0">
+                <label for="red">I am red</label><br>
+              </td>
+            </table>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+  <script src="client.js"></script>
+  <script src="game.js"></script>
+
+  <ul>
+    <li>
+      First person types name and hits &quot; New Game&quot;&nbsp; (this person is
+      red)
+    </li>
+    <li>A code will be returned in the message box.</li>
+    <li>
+      Second person enters name and code on the same line as the Join
+      button.&nbsp; Then press that button.
+    </li>
+  </ul>
+</body>
+
+</html>
