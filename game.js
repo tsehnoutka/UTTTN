@@ -11,6 +11,9 @@ const OUTERGAME = 9;
 const gameLocation = [11, 12, 13, 21, 22, 23, 31, 32, 33];
 const TXT_INPUT = document.querySelector("#input");
 const CB_RED = document.querySelector("redCB");
+const GT_UTTT=0;
+const GT_REVERSI=1;
+const GAME_TYPE = GT_UTTT;
 
 var playerScore = new Array(); //  player, game, array of squares
 for (p = 0; p < 2; p++) {
@@ -29,6 +32,7 @@ var outputMessage = ""
 var displayMessage = false;
 var gameOn=false;
 var checkCurrentGame = true;
+
 
 //  for Save / Load feature
 var moves = new Array();  //  this holds the player # and the move that player made
@@ -233,6 +237,9 @@ function onPlayAgain() {
   if (!recievedPlayAgain)
     sendPlayAgain();
   recievedPlayAgain = false;
+
+  moves = [];  //  this holds the player # and the move that player made
+  moveIndex =0;
 }
 BTN_PLAYAGAIN.addEventListener("click", onPlayAgain, false);
 

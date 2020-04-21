@@ -64,7 +64,8 @@ jQuery(document).ready(function($) {
       return;
     }
     socket.emit('createGame', {
-      name: name
+      name: name,
+      type: GAME_TYPE
     });
   }); //  end new game
 
@@ -74,7 +75,7 @@ jQuery(document).ready(function($) {
     console.log("Join clicked");
 
     name = $('#nameJoin').val().escape();
-    color = "green";
+    color = PLAYER2_COLOR;
     let roomID = $('#room').val().escape();
     if (!name || !roomID) {
       const playPromise = BONK_SOUND.play();
@@ -86,7 +87,8 @@ jQuery(document).ready(function($) {
     }
     socket.emit('joinGame', {
       name: name,
-      room: roomID
+      room: roomID,
+      type: GAME_TYPE
     });
   }); //  end join
 
@@ -132,7 +134,7 @@ jQuery(document).ready(function($) {
 
     socket.emit('load', {
       room: loadCode,
-      red: document.getElementById("redCB").checked
+      player1: document.getElementById("P1CB").checked
     });
   }); //  end load
 
@@ -304,24 +306,24 @@ socket.on('load', function(data) {
   let whoWentLast = data.game[data.game.length - 1].player;
 
   //  variable youtTurn is set when create game returns
-  // if who went last is 0, and you are red, it is NOT your turn
+  // if who went last is 0, and you are player1, it is NOT your turn
   yourTurn = true;
-  if (0 == whoWentLast) { //  its green's turn
-    if (data.red) //  are you red?
+  if (0 == whoWentLast) { //  its player 2's turn
+    if (data.player1) //  are you player1?
       yourTurn = false;
-  } else if (1 == whoWentLast) { //  it's red's turn
-    if (!data.red) //  are you NOT red?
+  } else if (1 == whoWentLast) { //  it's player1's turn
+    if (!data.player1) //  are you NOT player1?
       yourTurn = false;
   }
 
   let now = new Date().getTime();
   name = data.name;
-  if (data.red) {
+  if (data.player1) {
     color = PLAYER1_COLOR;
-    addMessage("SERVER", name + ": You're the color: " +PLAYER1_COLOR , "black", now);
+    addMessage("SERVER", name + ": You're the color: " + PLAYER1_COLOR, "black", now);
   } else {
-    color = "green";
-    addMessage("SERVER", name + ": You're the color green", "black", now)
+    color = PLAYER2_COLOR;
+    addMessage("SERVER", name + ": You're the color: " + PLAYER2_COLOR, "black", now)
   }
   disableInput();
 }); //  end load
