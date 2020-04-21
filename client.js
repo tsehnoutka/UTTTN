@@ -54,7 +54,7 @@ jQuery(document).ready(function($) {
   $('#new').on('click', function() {
     console.log("New game clicked");
     name = $('#nameNew').val().escape();
-    color = "red"
+    color = PLAYER1_COLOR;
     if (!name) {
       const playPromise = BONK_SOUND.play();
       if (playPromise !== null) {
@@ -317,8 +317,8 @@ socket.on('load', function(data) {
   let now = new Date().getTime();
   name = data.name;
   if (data.red) {
-    color = "red";
-    addMessage("SERVER", name + ": You're the color red", "black", now);
+    color = PLAYER1_COLOR;
+    addMessage("SERVER", name + ": You're the color: " +PLAYER1_COLOR , "black", now);
   } else {
     color = "green";
     addMessage("SERVER", name + ": You're the color green", "black", now)
