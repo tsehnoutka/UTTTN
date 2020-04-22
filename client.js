@@ -58,7 +58,9 @@ jQuery(document).ready(function($) {
     if (!name) {
       const playPromise = BONK_SOUND.play();
       if (playPromise !== null) {
-        playPromise.catch(() => { BONK_SOUND.play();})
+        playPromise.catch(() => {
+          BONK_SOUND.play();
+        })
       }
       alert('Please enter your name.');
       return;
@@ -80,7 +82,9 @@ jQuery(document).ready(function($) {
     if (!name || !roomID) {
       const playPromise = BONK_SOUND.play();
       if (playPromise !== null) {
-        playPromise.catch(() => { BONK_SOUND.play();})
+        playPromise.catch(() => {
+          BONK_SOUND.play();
+        })
       }
       alert('Please enter your name and game code.');
       return;
@@ -112,7 +116,9 @@ jQuery(document).ready(function($) {
 
     const playPromise = BONK_SOUND.play();
     if (playPromise !== null) {
-      playPromise.catch(() => { BONK_SOUND.play();})
+      playPromise.catch(() => {
+        BONK_SOUND.play();
+      })
     }
     alert(alertMsg);
   }); //  end save
@@ -126,15 +132,18 @@ jQuery(document).ready(function($) {
     if ("" == loadCode) {
       const playPromise = BONK_SOUND.play();
       if (playPromise !== null) {
-        playPromise.catch(() => { BONK_SOUND.play();})
+        playPromise.catch(() => {
+          BONK_SOUND.play();
+        })
       }
       alert("Please enter a code");
       return;
     }
-
+    code = loadCode;
     socket.emit('load', {
       room: loadCode,
-      player1: document.getElementById("P1CB").checked
+      player1: document.getElementById("P1CB").checked,
+      type: GAME_TYPE
     });
   }); //  end load
 
@@ -196,6 +205,13 @@ function sendPlayAgain() {
   socket.emit('playAgain', {
     room: code
   });
+
+  socket.emit('message', {
+  name: name,
+  text: "has reset the game",
+  color: color,
+  room: code
+});
 }
 
 //  ***************
@@ -214,7 +230,7 @@ window.onbeforeunload = function() {
 //New Game created. Update UI.
 socket.on('newGame', function(data) {
   console.log("On new game - " + data.room);
-  let message = 'Ask your friend to enter Game ID: ' +  data.room + '. Waiting for player 2...';
+  let message = 'Ask your friend to enter Game ID: ' + data.room + '. Waiting for player 2...';
   addMessage("SERVER", message, "Black", data.time);
   console.log("System - The count is: " + data.count)
   code = data.room;
@@ -292,7 +308,10 @@ socket.on('saved', function(data) {
 socket.on('load', function(data) {
   console.log("on lLoad");
   checkCurrentGame = false;
-  for (i = 0; i < data.game.length; i++) {
+  let iLength = data.game.length;
+  console.log("Load length: " + iLength);
+  for (i = 0; i < iLength; i++) {
+    console.log("In load game: " + i);
     let temp = data.game[i].move.toString();
     let p = temp.substring(0, 1);
     let y = temp.substring(1, 2);
